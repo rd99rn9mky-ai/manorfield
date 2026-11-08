@@ -169,7 +169,7 @@ function measureReach() {
   return highest;
 }
 
-// Centers the form on the headline and attaches a line to each offering.
+// Centers the form on the headline and aims a line from there to each offering.
 function layout() {
   W = width;
   H = height;
@@ -183,25 +183,11 @@ function layout() {
   S = Math.min(widthLimit, H / 66, (cy - 28) / reach);
   Sx = Math.min(S * 1.45, widthLimit);
 
-  yaw = 0;
   offeringButtons.forEach((button, i) => {
     const box = button.getBoundingClientRect();
-    const ex = box.left - heroBox.left + box.width / 2;
-    const ey = box.top - heroBox.top;
-    let best = 0;
-    let bestDistance = Infinity;
-    for (let j = 0; j < N; j += 3) {
-      project(wx[j], wy[j], wz[j]);
-      const distance = (px - ex) * (px - ex) + Math.pow(py - (cy + H * 0.22), 2);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = j;
-      }
-    }
     const feeder = feeders[i] || (feeders[i] = { xs: new Float32Array(FEED_N), ys: new Float32Array(FEED_N), packets: [] });
-    feeder.anchor = best;
-    feeder.ex = ex;
-    feeder.ey = ey;
+    feeder.ex = box.left - heroBox.left + box.width / 2;
+    feeder.ey = box.top - heroBox.top;
   });
 }
 
@@ -301,8 +287,8 @@ function draw() {
   // Lines down to the offerings
   const feederAlpha = ease01(3, 4.4, t);
   feeders.forEach((feeder, i) => {
-    const ax = sx[feeder.anchor];
-    const ay = sy[feeder.anchor];
+    const ax = cx;
+    const ay = cy;
     const c1y = ay + (feeder.ey - ay) * 0.55;
     const c2y = feeder.ey - (feeder.ey - ay) * 0.5;
     for (let k = 0; k < FEED_N; k++) {
