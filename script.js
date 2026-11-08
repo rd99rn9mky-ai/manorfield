@@ -11,7 +11,11 @@ function showOffering(selected) {
 
 offerings.forEach((offering) => {
   offering.addEventListener("mouseenter", () => showOffering(offering));
-  offering.addEventListener("click", () => showOffering(offering));
+  offering.addEventListener("click", () => {
+    showOffering(offering);
+    // On short screens, bring the details into view after a tap.
+    document.getElementById(offering.getAttribute("aria-controls")).scrollIntoView({ block: "nearest" });
+  });
 });
 
 // Hamburger menu.

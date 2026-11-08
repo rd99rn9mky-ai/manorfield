@@ -19,6 +19,8 @@ let active = -1;
 let yaw = 0;
 let pitch = 0.12;
 let px, py, pz, cx, cy, S, Sx, bounds;
+let shiftX = 0;
+let shiftY = 0;
 
 function heroHeight() {
   return Math.ceil(offeringRow.getBoundingClientRect().bottom - hero.getBoundingClientRect().top + 28);
@@ -155,11 +157,17 @@ function measureBounds() {
   cy = 0;
   S = 1;
   Sx = 1;
-  const bounds = { side: 0, up: 0, down: 0 };
+  shiftX = 0;
+  shiftY = 0;
+  let left = 0;
+  let right = 0;
+  let up = 0;
+  let down = 0;
   function include() {
-    bounds.side = Math.max(bounds.side, Math.abs(px));
-    bounds.up = Math.max(bounds.up, -py);
-    bounds.down = Math.max(bounds.down, py);
+    left = Math.max(left, -px);
+    right = Math.max(right, px);
+    up = Math.max(up, -py);
+    down = Math.max(down, py);
   }
   for (let a = -8; a <= 8; a++) {
     for (let b = -2; b <= 2; b++) {
@@ -175,7 +183,10 @@ function measureBounds() {
       }
     }
   }
-  return bounds;
+  // These nudges put the middle of the drawing's full extent on the center point.
+  shiftX = (left - right) / 2;
+  shiftY = (up - down) / 2;
+  return { halfWidth: (left + right) / 2, halfHeight: (up + down) / 2 };
 }
 
 // Centers the form on the headline and aims a line from there to each offering.
@@ -183,17 +194,17 @@ function layout() {
   W = width;
   H = height;
   const heroBox = hero.getBoundingClientRect();
-  const text = document.querySelector(".mission-text").getBoundingClientRect();
+  const headline = document.querySelector(".mission h1").getBoundingClientRect();
   cx = W / 2;
-  cy = text.top - heroBox.top + text.height / 2;
+  cy = headline.top - heroBox.top + headline.height / 2;
   // Overall size. Every limit below keeps the whole drawing, at every point
   // in its swing, inside the margins: the sides line up with the offerings.
   const sideMargin = offeringButtons[0].getBoundingClientRect().left - heroBox.left;
   const edgeMargin = Math.max(16, Math.min(W, H) * 0.04);
   // The extra 10 leaves room for the glow around a packet at the far edge.
-  const fitSides = (cx - sideMargin - 10) / bounds.side;
-  const fitTop = (cy - edgeMargin) / bounds.up;
-  const fitBottom = (H - cy - edgeMargin) / bounds.down;
+  const fitSides = (cx - sideMargin - 10) / bounds.halfWidth;
+  const fitTop = (cy - edgeMargin) / bounds.halfHeight;
+  const fitBottom = (H - cy - edgeMargin) / bounds.halfHeight;
   S = Math.min(H / 66, fitTop, fitBottom, fitSides);
   Sx = Math.min(S * 1.45, fitSides, W < 700 ? fitSides : W / 122);
   S = Math.min(S, Sx);
@@ -256,8 +267,8 @@ function project(x, y, z) {
   const y1 = y * cp - z1 * sp;
   const z2 = y * sp + z1 * cp;
   const f = 190 / (190 + z2);
-  px = cx + x1 * f * Sx;
-  py = cy + y1 * f * S;
+  px = cx + (x1 * f + shiftX) * Sx;
+  py = cy + (y1 * f + shiftY) * S;
   pz = z2;
 }
 
