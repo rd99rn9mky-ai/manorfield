@@ -3,6 +3,9 @@
 // lines. The numbers near the top of each section are the ones worth tuning.
 
 const INK = "230,227,220";
+const YAW_SWING = 0.58;
+const PITCH_CENTER = 0.12;
+const PITCH_SWING = 0.07;
 const FEED_SPACING = 2; // pixels between points on the lines to the offerings
 const FEED_SPAN = 26; // half the length of a packet on those lines, in points
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -15,7 +18,7 @@ let feeders = [];
 let active = -1;
 let yaw = 0;
 let pitch = 0.12;
-let px, py, pz, cx, cy, S, Sx, reach;
+let px, py, pz, cx, cy, S, Sx, bounds;
 
 function heroHeight() {
   return Math.ceil(offeringRow.getBoundingClientRect().bottom - hero.getBoundingClientRect().top + 28);
@@ -36,7 +39,7 @@ function setup() {
   buildLorenz();
   buildDust();
   buildSprite();
-  reach = measureReach();
+  bounds = measureBounds();
   layout();
 
   for (let i = 0; i < (small ? 4 : 8); i++) {
@@ -146,28 +149,33 @@ function buildSprite() {
   c.fillRect(0, 0, 64, 64);
 }
 
-// How far above its center the drawing can rise, at scale 1, across its swing.
-function measureReach() {
+// How far the drawing can reach from its center, at scale 1, across its swing.
+function measureBounds() {
   cx = 0;
   cy = 0;
   S = 1;
   Sx = 1;
-  let highest = 0;
-  [-0.58, 0, 0.58].forEach((y) => {
-    [0.05, 0.19].forEach((p) => {
-      yaw = y;
-      pitch = p;
+  const bounds = { side: 0, up: 0, down: 0 };
+  function include() {
+    bounds.side = Math.max(bounds.side, Math.abs(px));
+    bounds.up = Math.max(bounds.up, -py);
+    bounds.down = Math.max(bounds.down, py);
+  }
+  for (let a = -8; a <= 8; a++) {
+    for (let b = -2; b <= 2; b++) {
+      yaw = (a / 8) * YAW_SWING;
+      pitch = PITCH_CENTER + (b / 2) * PITCH_SWING;
       for (let i = 0; i < N; i += 4) {
         project(wx[i], wy[i], wz[i]);
-        highest = Math.max(highest, -py);
+        include();
       }
       for (let i = 0; i < D; i += 2) {
         project(dx[i], dy[i], dz[i]);
-        highest = Math.max(highest, -py);
+        include();
       }
-    });
-  });
-  return highest;
+    }
+  }
+  return bounds;
 }
 
 // Centers the form on the headline and aims a line from there to each offering.
@@ -178,11 +186,17 @@ function layout() {
   const text = document.querySelector(".mission-text").getBoundingClientRect();
   cx = W / 2;
   cy = text.top - heroBox.top + text.height / 2;
-  // Overall size. The last limit keeps the top of the drawing on the page
-  // at every point in its swing; raise the 28 for more room above it.
-  const widthLimit = W < 700 ? W / 84 : W / 122;
-  S = Math.min(widthLimit, H / 66, (cy - 28) / reach);
-  Sx = Math.min(S * 1.45, widthLimit);
+  // Overall size. Every limit below keeps the whole drawing, at every point
+  // in its swing, inside the margins: the sides line up with the offerings.
+  const sideMargin = offeringButtons[0].getBoundingClientRect().left - heroBox.left;
+  const edgeMargin = Math.max(16, Math.min(W, H) * 0.04);
+  // The extra 10 leaves room for the glow around a packet at the far edge.
+  const fitSides = (cx - sideMargin - 10) / bounds.side;
+  const fitTop = (cy - edgeMargin) / bounds.up;
+  const fitBottom = (H - cy - edgeMargin) / bounds.down;
+  S = Math.min(H / 66, fitTop, fitBottom, fitSides);
+  Sx = Math.min(S * 1.45, fitSides, W < 700 ? fitSides : W / 122);
+  S = Math.min(S, Sx);
 
   offeringButtons.forEach((button, i) => {
     const box = button.getBoundingClientRect();
@@ -300,8 +314,8 @@ function draw() {
   const dt = Math.min(deltaTime / 16.67, 3);
   ctx.clearRect(0, 0, W, H);
 
-  yaw = Math.sin(t * 0.13) * 0.58;
-  pitch = 0.12 + Math.sin(t * 0.09) * 0.07;
+  yaw = Math.sin(t * 0.13) * YAW_SWING;
+  pitch = PITCH_CENTER + Math.sin(t * 0.09) * PITCH_SWING;
 
   for (let i = 0; i < N; i++) {
     project(wx[i], wy[i], wz[i]);

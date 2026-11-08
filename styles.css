@@ -12,6 +12,7 @@
   --muted: #b5b2ab;
   --line: rgba(230, 227, 220, 0.24);
   --gutter: clamp(16px, 4vw, 40px);
+  --offering-margin: clamp(16px, 5vw, 80px); /* left and right edges of the three offerings */
   --flow-opacity: 0.62; /* how visible the home page drawing is */
 }
 
@@ -185,7 +186,7 @@ a {
   align-items: center;
   justify-content: center;
   min-height: max(340px, calc(100vh - 280px));
-  padding: 40px 16px;
+  padding: 40px var(--offering-margin);
 }
 
 .mission-text {
@@ -210,7 +211,8 @@ a {
 .mission h1 {
   margin: 0;
   color: var(--headline);
-  font-size: clamp(36px, 5.5vw, 100px);
+  /* Sized so the single line stops inside the offerings' left and right edges. */
+  font-size: clamp(34px, calc((100vw - 2 * var(--offering-margin)) / 18.5), 96px);
   font-weight: 800;
   line-height: 1.02;
   letter-spacing: -0.03em;
@@ -224,12 +226,18 @@ a {
   line-height: 1.45;
 }
 
+.subheadline-phone {
+  display: none;
+  margin: 0 auto 28px;
+  padding: 0 var(--offering-margin);
+}
+
 /* Keeps the three offerings side by side. */
 .offering-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(8px, 4vw, 72px);
-  padding: 0 clamp(16px, 5vw, 80px) 28px;
+  padding: 0 var(--offering-margin) 28px;
 }
 
 .offering {
@@ -346,6 +354,14 @@ a {
 }
 
 @media (max-width: 640px) {
+  .subheadline-wide {
+    display: none;
+  }
+
+  .subheadline-phone {
+    display: block;
+  }
+
   .entry {
     grid-template-columns: 1fr;
   }
