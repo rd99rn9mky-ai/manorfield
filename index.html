@@ -6,24 +6,28 @@
   <title>Manor Field</title>
   <meta name="description" content="We design the systems that run small studios and agencies.">
   <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add("js")</script>
   <script src="script.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js" defer></script>
   <script src="flow.js" defer></script>
 </head>
 <body>
-  <div id="hero">
-    <header class="site-header">
-      <a class="site-name" href="index.html">Manor Field</a>
-      <nav class="site-nav">
+  <header class="site-bar" data-reveal>
+    <div class="menu">
+      <button type="button" class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span></button>
+      <nav class="site-menu" id="site-menu" aria-label="Site" hidden>
+        <a href="index.html" aria-current="page">Home</a>
         <a href="services.html">Services</a>
         <a href="founder-experience.html">Founder Experience</a>
         <a href="process.html">Process</a>
         <a href="about.html">About</a>
         <a href="contact.html">Contact</a>
-        <a class="cta" href="contact.html">Start a project</a>
       </nav>
-    </header>
+    </div>
+    <a class="box cta" href="contact.html">Start a project</a>
+  </header>
 
+  <div id="hero">
     <main class="home">
       <section class="mission">
         <div class="mission-text">
@@ -34,9 +38,9 @@
 
       <section class="offerings">
         <div class="offering-row">
-          <button type="button" class="offering" aria-expanded="false" aria-controls="detail-ops">Internal ops systems</button>
-          <button type="button" class="offering" aria-expanded="false" aria-controls="detail-research">Research and outreach</button>
-          <button type="button" class="offering" aria-expanded="false" aria-controls="detail-brand">Brand and design systems</button>
+          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-ops">Internal ops systems</button>
+          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-research">Research and outreach</button>
+          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-brand">Brand and design systems</button>
         </div>
 
         <div class="offering-details">

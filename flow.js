@@ -14,7 +14,7 @@ let feeders = [];
 let active = -1;
 let yaw = 0;
 let pitch = 0.12;
-let px, py, pz, cx, cy, S;
+let px, py, pz, cx, cy, S, Sx, reach;
 
 function heroHeight() {
   return Math.ceil(offeringRow.getBoundingClientRect().bottom - hero.getBoundingClientRect().top + 28);
@@ -35,6 +35,7 @@ function setup() {
   buildLorenz();
   buildDust();
   buildSprite();
+  reach = measureReach();
   layout();
 
   for (let i = 0; i < (small ? 4 : 8); i++) {
@@ -144,6 +145,30 @@ function buildSprite() {
   c.fillRect(0, 0, 64, 64);
 }
 
+// How far above its center the drawing can rise, at scale 1, across its swing.
+function measureReach() {
+  cx = 0;
+  cy = 0;
+  S = 1;
+  Sx = 1;
+  let highest = 0;
+  [-0.58, 0, 0.58].forEach((y) => {
+    [0.05, 0.19].forEach((p) => {
+      yaw = y;
+      pitch = p;
+      for (let i = 0; i < N; i += 4) {
+        project(wx[i], wy[i], wz[i]);
+        highest = Math.max(highest, -py);
+      }
+      for (let i = 0; i < D; i += 2) {
+        project(dx[i], dy[i], dz[i]);
+        highest = Math.max(highest, -py);
+      }
+    });
+  });
+  return highest;
+}
+
 // Centers the form on the headline and attaches a line to each offering.
 function layout() {
   W = width;
@@ -152,7 +177,11 @@ function layout() {
   const text = document.querySelector(".mission-text").getBoundingClientRect();
   cx = W / 2;
   cy = text.top - heroBox.top + text.height / 2;
-  S = W < 700 ? Math.min(W / 66, H / 46) : Math.min(W / 100, H / 54);
+  // Overall size. The last limit keeps the top of the drawing on the page
+  // at every point in its swing; raise the 28 for more room above it.
+  const widthLimit = W < 700 ? W / 84 : W / 122;
+  S = Math.min(widthLimit, H / 66, (cy - 28) / reach);
+  Sx = Math.min(S * 1.45, widthLimit);
 
   yaw = 0;
   offeringButtons.forEach((button, i) => {
@@ -193,7 +222,7 @@ function project(x, y, z) {
   const y1 = y * cp - z1 * sp;
   const z2 = y * sp + z1 * cp;
   const f = 190 / (190 + z2);
-  px = cx + x1 * f * S;
+  px = cx + x1 * f * Sx;
   py = cy + y1 * f * S;
   pz = z2;
 }

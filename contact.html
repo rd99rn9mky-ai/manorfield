@@ -5,18 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contact | Manor Field</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="site-header">
-    <a class="site-name" href="index.html">Manor Field</a>
-    <nav class="site-nav">
-      <a href="services.html">Services</a>
-      <a href="founder-experience.html">Founder Experience</a>
-      <a href="process.html">Process</a>
-      <a href="about.html">About</a>
-      <a href="contact.html" aria-current="page">Contact</a>
-      <a class="cta" href="contact.html">Start a project</a>
-    </nav>
+  <header class="site-bar">
+    <div class="menu">
+      <button type="button" class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span></button>
+      <nav class="site-menu" id="site-menu" aria-label="Site" hidden>
+        <a href="index.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="founder-experience.html">Founder Experience</a>
+        <a href="process.html">Process</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" aria-current="page">Contact</a>
+      </nav>
+    </div>
+    <a class="box cta" href="contact.html">Start a project</a>
   </header>
 
   <main class="page">
