@@ -3,7 +3,8 @@
 // lines. The numbers near the top of each section are the ones worth tuning.
 
 const INK = "230,227,220";
-const FEED_N = 60;
+const FEED_SPACING = 2; // pixels between points on the lines to the offerings
+const FEED_SPAN = 26; // half the length of a packet on those lines, in points
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let hero, offeringRow, offeringButtons, W, H, N, D, ctx, sprite;
@@ -185,15 +186,48 @@ function layout() {
 
   offeringButtons.forEach((button, i) => {
     const box = button.getBoundingClientRect();
-    const feeder = feeders[i] || (feeders[i] = { xs: new Float32Array(FEED_N), ys: new Float32Array(FEED_N), packets: [] });
-    feeder.ex = box.left - heroBox.left + box.width / 2;
-    feeder.ey = box.top - heroBox.top;
+    const packets = feeders[i] ? feeders[i].packets : [];
+    feeders[i] = buildFeeder(box.left - heroBox.left + box.width / 2, box.top - heroBox.top);
+    feeders[i].packets = packets;
   });
 }
 
+// A curve from the center to an offering, resampled so its points are evenly
+// spaced and packets travel at a steady speed.
+function buildFeeder(ex, ey) {
+  const c1y = cy + (ey - cy) * 0.55;
+  const c2y = ey - (ey - cy) * 0.5;
+  const fine = 500;
+  const fx = new Float32Array(fine + 1);
+  const fy = new Float32Array(fine + 1);
+  const along = new Float32Array(fine + 1);
+  for (let k = 0; k <= fine; k++) {
+    const u = k / fine;
+    const v = 1 - u;
+    fx[k] = v * v * v * cx + 3 * v * v * u * cx + 3 * v * u * u * ex + u * u * u * ex;
+    fy[k] = v * v * v * cy + 3 * v * v * u * c1y + 3 * v * u * u * c2y + u * u * u * ey;
+    if (k > 0) along[k] = along[k - 1] + Math.hypot(fx[k] - fx[k - 1], fy[k] - fy[k - 1]);
+  }
+  const n = Math.max(2, Math.ceil(along[fine] / FEED_SPACING) + 1);
+  const xs = new Float32Array(n);
+  const ys = new Float32Array(n);
+  let k = 0;
+  for (let i = 0; i < n; i++) {
+    const target = (along[fine] * i) / (n - 1);
+    while (k < fine - 1 && along[k + 1] < target) k++;
+    const part = (target - along[k]) / (along[k + 1] - along[k] || 1);
+    xs[i] = fx[k] + (fx[k + 1] - fx[k]) * part;
+    ys[i] = fy[k] + (fy[k + 1] - fy[k]) * part;
+  }
+  return { xs, ys, n };
+}
+
 function windowResized() {
-  resizeCanvas(hero.offsetWidth, heroHeight());
-  ctx = drawingContext;
+  const nextHeight = heroHeight();
+  if (hero.offsetWidth !== width || nextHeight !== height) {
+    resizeCanvas(hero.offsetWidth, nextHeight);
+    ctx = drawingContext;
+  }
   layout();
   if (reduced) redraw();
 }
@@ -213,25 +247,43 @@ function project(x, y, z) {
   pz = z2;
 }
 
-function pulse(xs, ys, n, pos, span, step) {
-  const head = Math.round(pos);
-  ctx.lineCap = "round";
-  for (let k = -span; k < span; k += step) {
-    const i = head + k;
-    const j = i + step;
-    if (i < 0 || j >= n) continue;
-    const g = Math.exp(-Math.pow(k / (span * 0.46), 2));
-    ctx.lineWidth = 0.9 + 1.7 * g;
-    ctx.strokeStyle = `rgba(${INK},${(0.1 + 0.6 * g).toFixed(3)})`;
-    ctx.beginPath();
-    ctx.moveTo(xs[i], ys[i]);
-    ctx.lineTo(xs[j], ys[j]);
-    ctx.stroke();
+// Draws one packet as a single tapered ribbon that follows the line. Its
+// position is continuous rather than snapped to points on the path, and
+// strength fades it in and out so it never pops at the ends of a line.
+function pulse(xs, ys, n, pos, span, step, strength) {
+  if (strength <= 0) return;
+  const base = Math.floor(pos);
+  const left = [];
+  const right = [];
+  for (let i = base - span; i <= base + span; i += step) {
+    if (i < 1 || i >= n - 1) continue;
+    let tx = xs[i + 1] - xs[i - 1];
+    let ty = ys[i + 1] - ys[i - 1];
+    const length = Math.hypot(tx, ty) || 1;
+    tx /= length;
+    ty /= length;
+    const offset = (i - pos) / (span * 0.46);
+    const half = 1.45 * Math.exp(-offset * offset) * strength;
+    left.push(xs[i] - ty * half, ys[i] + tx * half);
+    right.push(xs[i] + ty * half, ys[i] - tx * half);
   }
-  if (head >= 0 && head < n) {
+  if (left.length < 6) return;
+
+  ctx.fillStyle = `rgba(${INK},${(0.75 * strength).toFixed(3)})`;
+  ctx.beginPath();
+  ctx.moveTo(left[0], left[1]);
+  for (let i = 2; i < left.length; i += 2) ctx.lineTo(left[i], left[i + 1]);
+  for (let i = right.length - 2; i >= 0; i -= 2) ctx.lineTo(right[i], right[i + 1]);
+  ctx.closePath();
+  ctx.fill();
+
+  if (base >= 0 && base < n - 1) {
+    const fraction = pos - base;
+    const hx = xs[base] + (xs[base + 1] - xs[base]) * fraction;
+    const hy = ys[base] + (ys[base + 1] - ys[base]) * fraction;
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = 0.4;
-    ctx.drawImage(sprite, xs[head] - 10, ys[head] - 10, 20, 20);
+    ctx.globalAlpha = 0.4 * strength;
+    ctx.drawImage(sprite, hx - 10, hy - 10, 20, 20);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
   }
@@ -286,27 +338,17 @@ function draw() {
 
   // Lines down to the offerings
   const feederAlpha = ease01(3, 4.4, t);
-  feeders.forEach((feeder, i) => {
-    const ax = cx;
-    const ay = cy;
-    const c1y = ay + (feeder.ey - ay) * 0.55;
-    const c2y = feeder.ey - (feeder.ey - ay) * 0.5;
-    for (let k = 0; k < FEED_N; k++) {
-      const u = k / (FEED_N - 1);
-      const v = 1 - u;
-      feeder.xs[k] = v * v * v * ax + 3 * v * v * u * ax + 3 * v * u * u * feeder.ex + u * u * u * feeder.ex;
-      feeder.ys[k] = v * v * v * ay + 3 * v * v * u * c1y + 3 * v * u * u * c2y + u * u * u * feeder.ey;
-    }
-    if (feederAlpha > 0) {
+  if (feederAlpha > 0) {
+    feeders.forEach((feeder, i) => {
       ctx.lineWidth = active === i ? 1.7 : 1;
       ctx.strokeStyle = `rgba(${INK},${((active === i ? 0.9 : 0.5) * feederAlpha).toFixed(3)})`;
-      const last = Math.floor((FEED_N - 1) * feederAlpha);
+      const last = Math.floor((feeder.n - 1) * feederAlpha);
       ctx.beginPath();
       ctx.moveTo(feeder.xs[0], feeder.ys[0]);
       for (let k = 1; k <= last; k++) ctx.lineTo(feeder.xs[k], feeder.ys[k]);
       ctx.stroke();
-    }
-  });
+    });
+  }
 
   // Packets
   if (t > 3.2 && !reduced) {
@@ -314,7 +356,7 @@ function draw() {
       packet.p += packet.v * dt * 0.42;
       if (packet.p < 40) packet.p = N - 41;
       if (packet.p > N - 41) packet.p = 40;
-      pulse(sx, sy, N, packet.p, 30, 2);
+      pulse(sx, sy, N, packet.p, 30, 2, Math.min(1, (packet.p - 40) / 140, (N - 41 - packet.p) / 140));
     });
     feeders.forEach((feeder) => {
       feeder.packets = feeder.packets.filter((packet) => !(packet.burst && packet.t > 1.05));
@@ -324,7 +366,9 @@ function draw() {
           if (packet.t > 1) packet.t = 0;
           if (packet.t < 0) packet.t = 1;
         }
-        if (packet.t >= 0 && packet.t <= 1) pulse(feeder.xs, feeder.ys, FEED_N, packet.t * (FEED_N - 1), 8, 1);
+        if (packet.t >= 0 && packet.t <= 1) {
+          pulse(feeder.xs, feeder.ys, feeder.n, packet.t * (feeder.n - 1), FEED_SPAN, 1, Math.min(1, packet.t / 0.1, (1 - packet.t) / 0.1));
+        }
       });
     });
   }
