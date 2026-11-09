@@ -3,6 +3,7 @@
 // lines. The numbers near the top of each section are the ones worth tuning.
 
 const INK = "230,227,220";
+const PHONE_STRETCH = 2.1; // how much taller the drawing is on phones
 const YAW_SWING = 0.58;
 const PITCH_CENTER = 0.12;
 const PITCH_SWING = 0.07;
@@ -209,6 +210,11 @@ function layout() {
   S = Math.min(H / 66, fitTop, fitBottom, fitSides);
   Sx = Math.min(S * 1.45, fitSides, W < 700 ? fitSides : W / 122);
   S = Math.min(S, Sx);
+  // Phones: stretch the drawing taller so it shows around the headline.
+  if (W < 700) {
+    const boxesBottom = offeringButtons[0].getBoundingClientRect().bottom - heroBox.top;
+    S = Math.min(Sx * PHONE_STRETCH, fitTop, (boxesBottom - cy) / bounds.halfHeight);
+  }
 
   offeringButtons.forEach((button, i) => {
     const box = button.getBoundingClientRect();
