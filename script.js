@@ -46,13 +46,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// Home page: the bar appears once you've scrolled halfway down. If the page
-// is too short to scroll, it stays visible so the menu is always reachable.
+// The links (web) or hamburger (phones) appear once you've scrolled halfway.
+// If the page is too short to scroll, they stay visible so the menu is reachable.
 function updateBar() {
-  if (!bar.hasAttribute("data-reveal")) return;
   const scrollable = document.documentElement.scrollHeight - window.innerHeight;
   const show = scrollable < 40 || window.scrollY >= scrollable / 2 || isMenuOpen();
-  bar.classList.toggle("is-visible", show);
+  bar.classList.toggle("is-revealed", show);
+  bar.classList.toggle("is-scrolled", window.scrollY > 8);
 }
 
 window.addEventListener("scroll", updateBar, { passive: true });

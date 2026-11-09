@@ -203,7 +203,8 @@ function layout() {
   const edgeMargin = Math.max(16, Math.min(W, H) * 0.04);
   // The extra 10 leaves room for the glow around a packet at the far edge.
   const fitSides = (cx - sideMargin - 10) / bounds.halfWidth;
-  const fitTop = (cy - edgeMargin) / bounds.halfHeight;
+  const barHeight = document.querySelector(".site-bar").offsetHeight;
+  const fitTop = (cy - barHeight - 8) / bounds.halfHeight; // stays clear of the top bar
   const fitBottom = (H - cy - edgeMargin) / bounds.halfHeight;
   S = Math.min(H / 66, fitTop, fitBottom, fitSides);
   Sx = Math.min(S * 1.45, fitSides, W < 700 ? fitSides : W / 122);
