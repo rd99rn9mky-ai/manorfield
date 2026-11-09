@@ -15,7 +15,7 @@ let wx, wy, wz, sx, sy, sz; // Lorenz line: world and screen positions
 let dx, dy, dz; // Tinkerbell dust: world positions
 let packets = [];
 let feeders = [];
-let active = -1;
+let active = 0; // the first offering starts selected
 let yaw = 0;
 let pitch = 0.12;
 let px, py, pz, cx, cy, S, Sx, bounds;
@@ -23,7 +23,7 @@ let shiftX = 0;
 let shiftY = 0;
 
 function heroHeight() {
-  return Math.ceil(offeringRow.getBoundingClientRect().bottom - hero.getBoundingClientRect().top + 28);
+  return Math.ceil(offeringRow.getBoundingClientRect().bottom - hero.getBoundingClientRect().top);
 }
 
 function setup() {

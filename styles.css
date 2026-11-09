@@ -22,6 +22,10 @@
   --line: rgba(230, 227, 220, 0.24);
   --gutter: clamp(16px, 4vw, 40px);
   --offering-margin: clamp(16px, 5vw, 80px); /* left and right edges of the three offerings */
+  --link-length: 72px; /* the space for the lines between the offerings and their panels */
+  --strip-width: clamp(22px, 4vw, 52px); /* the skinny panels */
+  --panel-gap: clamp(8px, 1vw, 14px);
+  --panel-padding: clamp(18px, 4vw, 48px);
   --flow-opacity: 0.62; /* how visible the home page drawing is */
   --screen-center: 50vh;
   --row-offset: max(150px, 20vh); /* how far the three offerings sit below the screen's center */
@@ -312,28 +316,96 @@ a {
 
 .subheadline-phone {
   display: none;
-  margin: 0 auto 28px;
+  margin: 28px auto 0;
   padding: 0 var(--offering-margin);
 }
 
 /* Keeps the three offerings side by side. */
 .offering-row {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(8px, 4vw, 72px);
-  padding: 0 var(--offering-margin) 28px;
+  padding: 0 var(--offering-margin) var(--link-length);
 }
 
 .offering {
+  position: relative;
   padding: 24px 12px;
   font-size: clamp(13px, 1.5vw, 19px);
+  transition: box-shadow 0.25s ease;
 }
 
+/* The selected offering: your bold font and a soft glow. */
+.offering[aria-expanded="true"] {
+  font-family: var(--font-bold);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--text), 0 0 22px rgba(230, 227, 220, 0.42);
+}
+
+/* The lines from the offerings down to their panels; script.js draws them. */
+.offering-links {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--link-length);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.offering-links path {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1;
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+
+.offering-links path.is-active {
+  opacity: 1;
+}
+
+/* Three panels side by side: the selected one is wide, the others are strips. */
 .offering-details {
-  max-width: 40em;
-  min-height: 170px;
-  margin: 0 auto;
-  padding: 8px 16px 0;
+  display: flex;
+  gap: var(--panel-gap);
+  margin: 0 var(--offering-margin);
+  container-type: inline-size;
+}
+
+.offering-detail {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 26px var(--panel-padding);
+  border: 1px solid var(--text);
+  border-radius: 10px;
+  background: var(--background);
+  transition: flex-grow 0.4s ease, flex-basis 0.4s ease, padding 0.4s ease;
+}
+
+.offering-detail[hidden] {
+  display: block;
+  flex: 0 0 var(--strip-width);
+  padding-right: 0;
+  padding-left: 0;
+  cursor: pointer;
+}
+
+.offering-detail[hidden] > * {
+  visibility: hidden;
+}
+
+/* A fixed text width keeps the panels the same height for all three. */
+.offering-detail > p {
+  width: calc(100cqw - 2 * var(--strip-width) - 2 * var(--panel-gap) - 2 * var(--panel-padding) - 2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offering-detail {
+    transition: none;
+  }
 }
 
 .offering-detail p {
