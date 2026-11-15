@@ -12,6 +12,10 @@ const PITCH_SWING = 0.07;
 const END_FADE = 0.12; // share of the curve, at each end, that fades out
 const GLOW_SIZE = 34; // how wide the light around each packet reaches, in pixels
 const GLOW_SPREAD = 0.3; // lower makes the glow fall off faster from its center
+const PACKET_OPACITY = 0.6; // how visible the packets are, from 0 (hidden) to 1 (full)
+const PACKET_START = 3.4; // seconds after load when the first packet appears on the curve
+const PACKET_STAGGER = 0.9; // seconds between one packet appearing and the next
+const PACKET_FADE_IN = 1.4; // how long each packet takes to fade in
 const FEED_DRAW_START = 3.2; // seconds after load when the lines to the offerings start drawing
 const FEED_DRAW_TIME = 1.8; // how long they take to reach the boxes
 const FEED_SPACING = 2; // pixels between points on the lines to the offerings
@@ -53,13 +57,15 @@ function setup() {
   layout();
 
   for (let i = 0; i < (small ? 4 : 8); i++) {
-    packets.push({ p: Math.random() * N, v: (i % 2 ? -1 : 1) * (1.1 + Math.random() * 1.5) });
+    // Each packet appears at its own moment, a little after the one before.
+    const appears = PACKET_START + i * PACKET_STAGGER + Math.random() * PACKET_STAGGER * 0.6;
+    packets.push({ p: Math.random() * N, v: (i % 2 ? -1 : 1) * (1.1 + Math.random() * 1.5), appears });
   }
 
   offeringButtons.forEach((button, i) => {
     feeders[i].packets = [
-      { t: Math.random(), v: 0.0011 },
-      { t: Math.random(), v: -0.0008 },
+      { t: Math.random(), v: 0.0011, appears: feederPacketStart(i, 0) },
+      { t: Math.random(), v: -0.0008, appears: feederPacketStart(i, 1) },
     ];
     button.addEventListener("mouseenter", () => activate(i));
     button.addEventListener("click", () => activate(i));
@@ -76,6 +82,11 @@ function setup() {
   }
 
   document.fonts.ready.then(windowResized);
+}
+
+// The packets on the lines to the offerings appear one by one after those lines finish drawing.
+function feederPacketStart(line, slot) {
+  return FEED_DRAW_START + FEED_DRAW_TIME + 0.3 + (slot * 3 + line) * 0.7 + Math.random() * 0.3;
 }
 
 function activate(i) {
@@ -316,7 +327,7 @@ function pulse(xs, ys, n, pos, span, step, strength, tint) {
   }
   if (left.length < 6) return;
 
-  ctx.fillStyle = `rgba(${ACCENTS[tint]},${(0.75 * strength).toFixed(3)})`;
+  ctx.fillStyle = `rgba(${ACCENTS[tint]},${(0.75 * strength * PACKET_OPACITY).toFixed(3)})`;
   ctx.beginPath();
   ctx.moveTo(left[0], left[1]);
   for (let i = 2; i < left.length; i += 2) ctx.lineTo(left[i], left[i + 1]);
@@ -329,7 +340,7 @@ function pulse(xs, ys, n, pos, span, step, strength, tint) {
     const hx = xs[base] + (xs[base + 1] - xs[base]) * fraction;
     const hy = ys[base] + (ys[base + 1] - ys[base]) * fraction;
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = 0.85 * strength;
+    ctx.globalAlpha = 0.85 * strength * PACKET_OPACITY;
     ctx.drawImage(sprites[tint], hx - GLOW_SIZE / 2, hy - GLOW_SIZE / 2, GLOW_SIZE, GLOW_SIZE);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
@@ -430,7 +441,8 @@ function draw() {
       packet.p += packet.v * dt * 0.42;
       if (packet.p < 40) packet.p = N - 41;
       if (packet.p > N - 41) packet.p = 40;
-      pulse(sx, sy, N, packet.p, 30, 2, Math.min(1, (packet.p - 40) / 140, (N - 41 - packet.p) / 140), k % 2);
+      const fadeIn = ease01(packet.appears, packet.appears + PACKET_FADE_IN, t);
+      pulse(sx, sy, N, packet.p, 30, 2, fadeIn * Math.min(1, (packet.p - 40) / 140, (N - 41 - packet.p) / 140), k % 2);
     });
     // Packets wait until the lines to the offerings have finished drawing.
     if (feederDrawn >= 1) feeders.forEach((feeder) => {
@@ -442,7 +454,8 @@ function draw() {
           if (packet.t < 0) packet.t = 1;
         }
         if (packet.t >= 0 && packet.t <= 1) {
-          pulse(feeder.xs, feeder.ys, feeder.n, packet.t * (feeder.n - 1), FEED_SPAN, 1, Math.min(1, packet.t / 0.1, (1 - packet.t) / 0.1), k % 2);
+          const fadeIn = packet.burst ? 1 : ease01(packet.appears, packet.appears + PACKET_FADE_IN, t);
+          pulse(feeder.xs, feeder.ys, feeder.n, packet.t * (feeder.n - 1), FEED_SPAN, 1, fadeIn * Math.min(1, packet.t / 0.1, (1 - packet.t) / 0.1), k % 2);
         }
       });
     });

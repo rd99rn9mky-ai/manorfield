@@ -120,6 +120,41 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// Home page: the outline around the beliefs. It runs along the top of the box,
+// down both sides, and halfway down turns outward through a rounded corner on
+// each side to reach the edges of the screen.
+const beliefsSection = document.querySelector(".home-closing");
+const beliefsCard = document.querySelector(".beliefs-card");
+const beliefsPath = document.querySelector(".beliefs-line");
+const beliefsFill = document.querySelector(".beliefs-fill");
+
+function drawBeliefsOutline() {
+  if (!beliefsCard || !beliefsPath) return;
+  const area = beliefsSection.getBoundingClientRect();
+  const box = beliefsCard.getBoundingClientRect();
+  const left = box.left - area.left;
+  const right = box.right - area.left;
+  const top = box.top - area.top;
+  const middle = top + box.height * 0.5;
+  const corner = 10; // the box's top corners, matching the other boxes
+  const turn = Math.min(14, left, area.width - right); // the outward curve halfway down
+  const outline =
+    `M0 ${middle} L${left - turn} ${middle} A${turn} ${turn} 0 0 0 ${left} ${middle - turn} ` +
+      `L${left} ${top + corner} A${corner} ${corner} 0 0 1 ${left + corner} ${top} ` +
+      `L${right - corner} ${top} A${corner} ${corner} 0 0 1 ${right} ${top + corner} ` +
+      `L${right} ${middle - turn} A${turn} ${turn} 0 0 0 ${right + turn} ${middle} L${area.width} ${middle}`;
+  beliefsPath.setAttribute("d", outline);
+  // The chalk fill: the same shape, closed off along the bottom of the section.
+  beliefsFill.setAttribute("d", `${outline} L${area.width} ${area.height} L0 ${area.height} Z`);
+}
+
+if (beliefsCard) {
+  drawBeliefsOutline();
+  window.addEventListener("resize", drawBeliefsOutline);
+  new ResizeObserver(drawBeliefsOutline).observe(beliefsSection);
+  document.fonts.ready.then(drawBeliefsOutline);
+}
+
 // The links (web) or hamburger (phones) appear once you've scrolled halfway.
 // If the page is too short to scroll, they stay visible so the menu is reachable.
 function updateBar() {
