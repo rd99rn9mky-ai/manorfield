@@ -12,6 +12,7 @@ function showOffering(selected) {
     panels[i].hidden = !isSelected;
   });
   animateLinks();
+  if (typeof drawBeliefsOutline === "function" && beliefsCard) drawBeliefsOutline();
 }
 
 offerings.forEach((offering) => {
@@ -127,6 +128,7 @@ const beliefsSection = document.querySelector(".home-closing");
 const beliefsCard = document.querySelector(".beliefs-card");
 const beliefsPath = document.querySelector(".beliefs-line");
 const beliefsFill = document.querySelector(".beliefs-fill");
+const beliefsLink = document.querySelector(".beliefs-link");
 
 function drawBeliefsOutline() {
   if (!beliefsCard || !beliefsPath) return;
@@ -146,6 +148,31 @@ function drawBeliefsOutline() {
   beliefsPath.setAttribute("d", outline);
   // The chalk fill: the same shape, closed off along the bottom of the section.
   beliefsFill.setAttribute("d", `${outline} L${area.width} ${area.height} L0 ${area.height} Z`);
+
+  // Carry the selected offering's line down from its panel. It always lands on
+  // the box at the same spot, under the first offering, bending like an S when
+  // another offering is selected.
+  const selected = offerings.find((offering) => offering.getAttribute("aria-expanded") === "true");
+  if (beliefsLink && selected) {
+    const centerOf = (element) => {
+      const box = element.getBoundingClientRect();
+      return Math.min(Math.max(box.left + box.width / 2 - area.left, left + corner), right - corner);
+    };
+    const startX = centerOf(selected);
+    const endX = centerOf(offerings[0]);
+    const startY = panelArea.getBoundingClientRect().bottom - area.top;
+    const change = endX - startX;
+    const way = Math.sign(change);
+    const bendY = (startY + top) / 2;
+    const radius = Math.min(Math.abs(change) / 2, (top - startY) * 0.4, 14);
+    beliefsLink.setAttribute(
+      "d",
+      Math.abs(change) <= 1
+        ? `M${startX} ${startY} L${startX} ${top}`
+        : `M${startX} ${startY} L${startX} ${bendY - radius} Q${startX} ${bendY} ${startX + way * radius} ${bendY} ` +
+            `L${endX - way * radius} ${bendY} Q${endX} ${bendY} ${endX} ${bendY + radius} L${endX} ${top}`
+    );
+  }
 }
 
 if (beliefsCard) {

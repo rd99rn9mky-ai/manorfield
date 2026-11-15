@@ -547,6 +547,20 @@ a {
   stroke-width: 1;
 }
 
+/* The selected offering's line, carried on down to the beliefs box. */
+.beliefs-outline .beliefs-link {
+  fill: none;
+  stroke: var(--accent-blue);
+  stroke-width: 1;
+}
+
+/* On phones the description sits in that gap, so the line would cross it. */
+@media (max-width: 640px) {
+  .beliefs-outline .beliefs-link {
+    display: none;
+  }
+}
+
 /* Text sits above the chalk shape. */
 .home-closing > :not(svg) {
   position: relative;
