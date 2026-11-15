@@ -337,15 +337,19 @@ a {
   line-height: 1.45;
 }
 
+/* Web: the subheadline stays on a single line under the headline. */
+@media (min-width: 900px) {
+  .subheadline-wide {
+    max-width: none;
+    white-space: nowrap;
+  }
+}
+
 .subheadline-wide {
   position: absolute;
   top: 100%;
   right: 0;
   left: 0;
-}
-
-.subheadline-phone {
-  display: none;
 }
 
 /* Keeps the three offerings side by side. */
@@ -514,11 +518,6 @@ a {
   font-size: 16px;
 }
 
-.home-closing .subheadline-phone {
-  margin-bottom: 24px;
-  color: var(--muted); /* sits on the charcoal, above the chalk shape */
-}
-
 /* The beliefs sit in a box whose sides, halfway down, curve outward and run
    to the edges of the screen. script.js draws that outline. */
 .beliefs-card {
@@ -552,13 +551,6 @@ a {
   fill: none;
   stroke: var(--accent-blue);
   stroke-width: 1;
-}
-
-/* On phones the description sits in that gap, so the line would cross it. */
-@media (max-width: 640px) {
-  .beliefs-outline .beliefs-link {
-    display: none;
-  }
 }
 
 /* Text sits above the chalk shape. */
@@ -701,10 +693,6 @@ a {
 
   .subheadline-wide {
     display: none;
-  }
-
-  .subheadline-phone {
-    display: block;
   }
 
   .entry {
