@@ -559,7 +559,7 @@ a {
 }
 
 .home-closing .beliefs {
-  max-width: 40em;
+  max-width: none; /* the beliefs run the full width of their box */
   margin: 14px 0 0;
   padding-left: 1.4em;
   font-size: 16px;
