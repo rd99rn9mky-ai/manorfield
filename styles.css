@@ -699,3 +699,87 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* Footer: the same items as the top bar, then contact details. */
+
+.site-footer {
+  padding: 48px var(--gutter) 28px;
+  border-top: 1px solid var(--line);
+}
+
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px 24px;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.footer-nav a,
+.footer-bottom a {
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+
+.footer-nav a:hover,
+.footer-nav a[aria-current="page"],
+.footer-bottom a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-green);
+}
+
+.site-footer .cta {
+  font-size: 15px;
+}
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.footer-copyright {
+  margin-left: auto;
+}
+
+@media (min-width: 860px) {
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .footer-top .site-name {
+    justify-self: start;
+  }
+
+  .footer-top .cta {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-copyright {
+    margin-left: 0;
+  }
+}
