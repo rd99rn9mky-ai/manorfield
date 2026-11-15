@@ -13,7 +13,7 @@
 </head>
 <body>
   <header class="site-bar site-bar-overlay">
-    <a class="site-name" href="index.html">Manor Field</a>
+    <a class="site-name" href="index.html"><span class="name-manor">Manor</span> <span class="name-field">Field</span></a>
     <div class="menu">
       <button type="button" class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span></button>
       <nav class="site-menu" id="site-menu" aria-label="Site" hidden>
@@ -31,39 +31,66 @@
     <main class="home">
       <section class="mission">
         <div class="mission-text">
-          <h1>Better systems for people who create</h1>
-          <p class="subheadline subheadline-wide">Manor Field builds the workflows, research engines and brand systems that let small teams spend less time on admin and more on the work.</p>
+          <h1>We build systems that let small teams compete.</h1>
+          <p class="subheadline subheadline-wide">Manor Field designs the workflows, visual systems and growth strategies that make small an advantage.</p>
         </div>
       </section>
 
       <section class="offerings">
         <div class="offering-row">
-          <button type="button" class="box offering" aria-expanded="true" aria-controls="detail-ops">Internal ops systems</button>
-          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-research">Research and outreach</button>
-          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-brand">Brand and design systems</button>
+          <button type="button" class="box offering" aria-expanded="true" aria-controls="detail-operations">Internal Operations</button>
+          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-brand">Brand Design</button>
+          <button type="button" class="box offering" aria-expanded="false" aria-controls="detail-growth">Growth Marketing</button>
           <svg class="offering-links" aria-hidden="true"><path></path><path></path><path></path></svg>
         </div>
 
         <div class="offering-details">
-          <div class="offering-detail" id="detail-ops">
-            <p class="problem">Your team runs on scattered spreadsheets, DMs and memory.</p>
-            <p>We map how your team actually works, then build the tools around it: run-of-shows, project trackers, automated bookkeeping and daily workflows, with AI handling the repetitive parts.</p>
-          </div>
-          <div class="offering-detail" id="detail-research" hidden>
-            <p class="problem">Finding the right clients and collaborators takes hours of manual research.</p>
-            <p>Automated research that finds and vets the right leads, collaborators or talent, plugged into a CRM with follow-ups built in.</p>
+          <div class="offering-detail" id="detail-operations">
+            <p class="problem">“My team runs on scattered spreadsheets, DMs and memory.”</p>
+            <ul class="offering-list">
+              <li>Project management</li>
+              <li>Event planning and run-of-shows</li>
+              <li>Bookkeeping and invoicing</li>
+              <li>Scheduling systems</li>
+              <li>Team documentation</li>
+              <li>Workflow automation</li>
+            </ul>
           </div>
           <div class="offering-detail" id="detail-brand" hidden>
-            <p class="problem">Your brand looks different everywhere it shows up.</p>
-            <p>Visual identity, social templates and websites, documented so anyone on your team can stay on brand.</p>
+            <p class="problem">“My brand looks different everywhere it shows up.”</p>
+            <ul class="offering-list">
+              <li>Website design</li>
+              <li>Visual identity</li>
+              <li>Brand guidelines</li>
+              <li>Social media templates</li>
+              <li>Pitch decks</li>
+              <li>Packaging and print design</li>
+            </ul>
+          </div>
+          <div class="offering-detail" id="detail-growth" hidden>
+            <p class="problem">“Finding the right clients and collaborators takes us hours of manual research.”</p>
+            <ul class="offering-list">
+              <li>Lead generation</li>
+              <li>Talent and collaborator research</li>
+              <li>Client management and follow-ups</li>
+              <li>Social media strategy</li>
+              <li>Email marketing</li>
+              <li>Performance analytics</li>
+            </ul>
           </div>
         </div>
-
-        <!-- Same text as above; this copy is the one shown on phones. -->
-        <p class="subheadline subheadline-phone">Manor Field builds the workflows, research engines and brand systems that let small teams spend less time on admin and more on the work.</p>
       </section>
 
-      <p class="experience-teaser">Before Manor Field, our founders built systems for fashion week, PR, music, retail and beauty clients. <a href="founder-experience.html">See what we've built.</a></p>
+      <section class="home-closing">
+        <!-- Same text as the subheadline above; this copy is the one shown on phones. -->
+        <p class="subheadline subheadline-phone">Manor Field designs the workflows, visual systems and growth strategies that make small an advantage.</p>
+        <p class="beliefs-intro">Manor Field was created out of two core beliefs:</p>
+        <ol class="beliefs">
+          <li>Small, independent companies should be given the tools to compete in rapidly evolving markets.</li>
+          <li>As digital spaces grow more hostile and chaotic, people deserve the chance to form constructive relationships with technology.</li>
+        </ol>
+        <p class="experience-teaser">Before Manor Field, our founders built systems for fashion week, PR, music, retail and beauty clients. <a href="founder-experience.html">See what we’ve built.</a></p>
+      </section>
     </main>
   </div>
 </body>

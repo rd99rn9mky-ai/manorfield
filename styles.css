@@ -1,6 +1,6 @@
 /* Manor Field stylesheet. Change the fonts, colors and spacing here. */
 
-@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap");
 
 @font-face {
   font-family: "Alte Haas Grotesk";
@@ -19,6 +19,11 @@
   --headline: #fbf9f4;
   --text: #e6e3dc;
   --muted: #b5b2ab;
+  --chalk-muted: #55534d; /* softer text on chalk backgrounds */
+  --accent-blue: #8ab3d3; /* highlights for information moving: packets, the selected offering */
+  --bar-background: #2a2a29; /* the top bar, the same charcoal as the page */
+  --bar-text: #e6e3dc;
+  --accent-green: #9bc598; /* highlights for things you can click: link underlines, button hover */
   --line: rgba(230, 227, 220, 0.24);
   --gutter: clamp(16px, 4vw, 40px);
   --offering-margin: clamp(16px, 5vw, 80px); /* left and right edges of the three offerings */
@@ -73,10 +78,11 @@ a {
   align-items: center;
   gap: 16px;
   padding: 14px var(--gutter);
-  background: var(--background);
+  background: var(--bar-background);
+  color: var(--bar-text);
 }
 
-/* Home page: floats over the drawing until the page is scrolled. */
+/* Home page: see-through over the drawing until the page is scrolled. */
 .site-bar-overlay {
   position: fixed;
   right: 0;
@@ -86,11 +92,16 @@ a {
 }
 
 .site-bar-overlay.is-scrolled {
-  background: var(--background);
+  background: var(--bar-background);
+}
+
+.site-bar > a:focus-visible,
+.site-bar .site-menu a:focus-visible {
+  outline-color: var(--bar-text);
 }
 
 .site-name {
-  color: var(--headline);
+  color: var(--bar-text);
   font-family: var(--font-bold);
   font-size: 18px;
   font-weight: 700;
@@ -101,6 +112,7 @@ a {
 /* Phones and tablets: a hamburger under "Start a project". */
 .menu {
   position: absolute;
+  z-index: 1;
   top: calc(100% - 6px);
   right: var(--gutter);
   transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
@@ -165,6 +177,7 @@ a {
 
 .site-menu a {
   padding: 10px 12px;
+  color: var(--text);
   font-family: var(--mono);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -176,6 +189,7 @@ a {
 .site-menu a:hover,
 .site-menu a[aria-current="page"] {
   text-decoration: underline;
+  text-decoration-color: var(--accent-green);
 }
 
 /* Web: the links sit in a row between the name and the button. */
@@ -212,6 +226,10 @@ a {
     border: 0;
     background: none;
   }
+
+  .site-menu a {
+    color: var(--bar-text);
+  }
 }
 
 /* The rectangle shared by the three offerings and "Start a project". */
@@ -229,6 +247,18 @@ a {
 .box:hover,
 .box[aria-expanded="true"] {
   box-shadow: inset 0 0 0 1px var(--text);
+}
+
+/* "Start a project" takes the bar's text color. */
+.site-bar .cta {
+  border-color: var(--bar-text);
+  background: transparent;
+  color: var(--bar-text);
+}
+
+.site-bar .cta:hover {
+  border-color: var(--accent-green);
+  box-shadow: inset 0 0 0 1px var(--accent-green);
 }
 
 .cta {
@@ -291,9 +321,9 @@ a {
 .mission h1 {
   font-family: var(--font-bold);
   margin: 0;
-  color: var(--headline);
+  color: var(--text); /* same chalk white as the top bar */
   /* Sized so the single line stops inside the offerings' left and right edges. */
-  font-size: clamp(34px, calc((100vw - 2 * var(--offering-margin)) / 18.5), 96px);
+  font-size: clamp(30px, calc((100vw - 2 * var(--offering-margin)) / 23), 84px);
   font-weight: 700;
   line-height: 1.02;
   letter-spacing: -0.03em;
@@ -316,8 +346,6 @@ a {
 
 .subheadline-phone {
   display: none;
-  margin: 28px auto 0;
-  padding: 0 var(--offering-margin);
 }
 
 /* Keeps the three offerings side by side. */
@@ -333,14 +361,16 @@ a {
   position: relative;
   padding: 24px 12px;
   font-size: clamp(13px, 1.5vw, 19px);
-  transition: box-shadow 0.25s ease;
+  transition: box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
 }
 
-/* The selected offering: your bold font and a soft glow. */
+/* The selected offering: filled chalk white with charcoal text, your bold font and a soft glow. */
 .offering[aria-expanded="true"] {
+  background: var(--text);
+  color: var(--background);
   font-family: var(--font-bold);
   font-weight: 700;
-  box-shadow: inset 0 0 0 1px var(--text), 0 0 22px rgba(230, 227, 220, 0.42);
+  box-shadow: inset 0 0 0 1px var(--text), 0 0 22px rgba(138, 179, 211, 0.45);
 }
 
 /* The lines from the offerings down to their panels; script.js draws them. */
@@ -363,6 +393,7 @@ a {
 }
 
 .offering-links path.is-active {
+  stroke: var(--accent-blue);
   opacity: 1;
 }
 
@@ -376,13 +407,66 @@ a {
 
 .offering-detail {
   flex: 1 1 0;
+  text-align: left;
   min-width: 0;
   overflow: hidden;
   padding: 26px var(--panel-padding);
   border: 1px solid var(--text);
   border-radius: 10px;
   background: var(--background);
-  transition: flex-grow 0.4s ease, flex-basis 0.4s ease, padding 0.4s ease;
+  transition: flex-grow 0.4s ease, flex-basis 0.4s ease, padding 0.4s ease, background 0.25s ease;
+}
+
+/* The open panel is filled like the selected offering. */
+.offering-detail:not([hidden]) {
+  background: var(--text);
+}
+
+.offering-detail:not([hidden]) .problem {
+  color: var(--background);
+}
+
+.offering-detail:not([hidden]) p:not(.problem),
+.offering-detail:not([hidden]) li {
+  color: var(--chalk-muted);
+}
+
+/* The six things under each offering, in three columns on wide screens. */
+.offering-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 28px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+}
+
+.offering-list li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.offering-list li::before {
+  content: "";
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 8px;
+  height: 1px;
+  background: currentColor;
+}
+
+@media (max-width: 900px) {
+  .offering-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .offering-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .offering-detail[hidden] {
@@ -398,7 +482,7 @@ a {
 }
 
 /* A fixed text width keeps the panels the same height for all three. */
-.offering-detail > p {
+.offering-detail > * {
   width: calc(100cqw - 2 * var(--strip-width) - 2 * var(--panel-gap) - 2 * var(--panel-padding) - 2px);
 }
 
@@ -414,6 +498,11 @@ a {
   font-size: 16px;
 }
 
+/* The problem lines are quotes in a client's voice. */
+.problem {
+  font-style: italic;
+}
+
 .offering-detail .problem {
   margin-bottom: 8px;
   color: var(--text);
@@ -422,16 +511,58 @@ a {
   line-height: 1.2;
 }
 
-.experience-teaser {
-  max-width: 36em;
-  margin: 24px auto 0;
-  padding: 0 16px 72px;
-  color: var(--muted);
+/* Everything after the panels sits on chalk, left-aligned with the panels. */
+.home-closing {
+  margin-top: 56px;
+  padding: 48px var(--offering-margin) 72px;
+  background: var(--text);
+  color: var(--background);
+  text-align: left;
+}
+
+.home-closing p {
+  max-width: 40em;
+  margin: 0;
   font-size: 16px;
 }
 
+.home-closing .subheadline-phone {
+  margin-bottom: 16px;
+  color: var(--background);
+}
+
+.beliefs-intro {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.home-closing .beliefs {
+  max-width: 40em;
+  margin: 14px 0 0;
+  padding-left: 1.4em;
+  font-size: 16px;
+}
+
+.home-closing .beliefs li + li {
+  margin-top: 8px;
+}
+
+.home-closing .beliefs li::marker {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.home-closing .experience-teaser {
+  margin-top: 36px;
+}
+
+.experience-teaser {
+  color: var(--chalk-muted);
+}
+
 .experience-teaser a {
-  color: var(--text);
+  color: var(--background);
+  text-decoration-color: var(--accent-green);
   text-underline-offset: 4px;
 }
 
@@ -493,12 +624,23 @@ a {
 
 .entry a {
   color: var(--text);
+  text-decoration-color: var(--accent-green);
   text-underline-offset: 4px;
+}
+
+.entry .offering-list {
+  color: var(--muted);
+}
+
+@media (min-width: 641px) {
+  .entry .offering-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .entry .offered-as {
   margin-top: 12px;
-  color: var(--text);
+  color: var(--accent-green);
   font-family: var(--mono);
   font-size: 12px;
 }
